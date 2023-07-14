@@ -10,12 +10,26 @@ def course_list(request, category_slug=None, tag_slug=None):
     current_user = request.user
 
     if category_slug != None:
-        category_page = get_object_or_404(Category, slug=category_slug)
-        courses = Course.objects.filter(available=True, category= category_page)
+        if current_user.is_authenticated:
+            enrolled_course = current_user.courses_joined.all()
+            category_page = get_object_or_404(Category, slug=category_slug)
+            courses = Course.objects.filter(available=True, category= category_page)
+            for course in enrolled_course:
+                courses = courses.exclude(id = course.id)
+        else:
+            category_page = get_object_or_404(Category, slug=category_slug)
+            courses = Course.objects.filter(available=True, category= category_page)
 
     elif tag_slug != None:
-        tag_page = get_object_or_404(Tag, slug=tag_slug)
-        courses = Course.objects.filter(available=True, tags=tag_page)
+        if current_user.is_authenticated:
+            enrolled_course = current_user.courses_joined.all()
+            tag_page = get_object_or_404(Tag, slug=tag_slug)
+            courses = Course.objects.filter(available=True, tags=tag_page)
+            for course in enrolled_course:
+                courses = courses.exclude(id = course.id)
+        else:
+            tag_page = get_object_or_404(Tag, slug=tag_slug)
+            courses = Course.objects.filter(available=True, tags=tag_page)
 
     else:
         #courses = Course.objects.all().order_by('-date')
